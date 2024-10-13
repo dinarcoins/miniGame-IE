@@ -10,12 +10,57 @@
   outline: none;
 }
 
+body {
+  text-align: center;
+  background-color: #f0f0f0;
+}
+
+h1 {
+  color: #333;
+}
+
+
 :root {
   --mainColor: #212121;
   --redPrimary: #dc3545;
   --whiteColor: #e8e8e8;
   --text-font-size: 1rem;
   --title-font-size: 2rem;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+table tr td input.preset {
+  font-weight: bold;
+  background-color: #c9c9c9;
+}
+
+input:not([disabled]) {
+  font-weight: 800;
+}
+
+#sudoku-board .top-border {
+  border-top: 2px solid black;
+}
+
+#sudoku-board .left-border {
+  border-left: 2px solid black;
+}
+
+#sudoku-board tr:first-child td {
+  border-top: 2px solid black;
+}
+
+#sudoku-board td:first-child {
+  border-left: 2px solid black;
 }
 
 .wraper {
@@ -130,15 +175,6 @@
   box-shadow: inset 0 1px 0 #ffe5c4, 0 10px 0 #915100;
 }
 
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background-color: #f0f0f0;
-}
-
-h1 {
-  color: #333;
-}
 
 #sudoku-board {
   border-collapse: collapse;
@@ -169,26 +205,21 @@ h1 {
 }
 
 .correct {
-  background-color: lightgreen;
+  background-color: lightgreen !important;
 }
 
 .duplicate {
-  background-color: lightcoral;
+  background-color: lightcoral !important;
 }
 
 .selected {
-  background-color: yellow;
+  background-color: yellow !important;
 }
 
 button {
   padding: 10px 20px;
   margin: 10px;
   cursor: pointer;
-}
-
-#status {
-  margin-top: 20px;
-  font-weight: bold;
 }
 
 #gameContainer {

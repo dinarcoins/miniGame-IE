@@ -7,10 +7,9 @@ let startTime;
 let currentDifficulty = "easy";
 let highScore = localStorage.getItem("highScore") || 123;
 const playerNameInput = document.getElementById("player-name");
-let playerName = "";
+var playerName = "";
 const gameArea = document.getElementById("game-area");
 const menu = document.getElementById("menu");
-const namePlayer = document.getElementById("playerName");
 const backToMenuBtn = document.getElementById("backToMenu");
 let currentCell = null;
 
@@ -65,7 +64,6 @@ function startGame() {
   }
   menu.style.display = "none";
   gameArea.style.display = "block";
-  document.getElementById("status").innerText = "";
   clearInterval(timer);
   startTime = Date.now();
   timer = setInterval(updateTimer, 1000);
@@ -81,9 +79,6 @@ function generateBoard(difficulty) {
     for (let col = 0; col < 9; col++) {
       const td = document.createElement("td");
       const input = document.createElement("input");
-      // input.addEventListener("keydown", (event) => {
-      //   event.preventDefault();
-      // });
       input.type = "number";
       input.min = 1;
       input.max = 9;
@@ -92,6 +87,16 @@ function generateBoard(difficulty) {
       input.addEventListener("input", () => checkInput(row, col, input.value));
       input.addEventListener("focus", () => highlightCell(input));
       input.addEventListener("blur", () => removeHighlight(input));
+      if (presetBoard[row][col] !== 0) {
+        input.classList.add("preset");
+      }
+
+      if (row % 3 === 0) {
+        td.classList.add("top-border");
+      }
+      if (col % 3 === 0) {
+        td.classList.add("left-border");
+      }
       td.appendChild(input);
       tr.appendChild(td);
     }
@@ -122,7 +127,7 @@ function generateSudokuBoard(difficulty) {
 
   removeCells(board, cellsToRemove);
 
-  return board
+  return board;
 }
 
 function fillBoard(board) {
@@ -266,4 +271,51 @@ function resetGame() {
   showNotification("success", "Game is reset!");
   clearInterval(timer);
   startGame();
+}
+
+function checkWinner() {
+  const inputs = document.querySelectorAll("#sudoku-board input");
+
+  // Check if all cells are filled
+  for (let input of inputs) {
+    if (input.value === "") {
+      return false; // The game is not complete
+    }
+  }
+
+  // Check for duplicate numbers in rows, columns, and 3x3 grids
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      const value = inputs[row * 9 + col].value;
+
+      // Check row
+      for (let i = 0; i < 9; i++) {
+        if (i !== col && inputs[row * 9 + i].value === value) {
+          return false;
+        }
+      }
+
+      // Check column
+      for (let i = 0; i < 9; i++) {
+        if (i !== row && inputs[i * 9 + col].value === value) {
+          return false;
+        }
+      }
+
+      // Check 3x3 grid
+      const startRow = Math.floor(row / 3) * 3;
+      const startCol = Math.floor(col / 3) * 3;
+      for (let i = startRow; i < startRow + 3; i++) {
+        for (let j = startCol; j < startCol + 3; j++) {
+          if ((i !== row || j !== col) && inputs[i * 9 + j].value === value) {
+            return false;
+          }
+        }
+      }
+    }
+  }
+
+  // If all checks passed, the player wins
+  showNotification("success", "Congratulations! You won the game!");
+  return true;
 }
