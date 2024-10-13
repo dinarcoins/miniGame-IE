@@ -1,8 +1,13 @@
-var ruleBtn = document.getElementById('ruleBtn')
-var showRulesContainer = document.querySelector('.showRuleContainer')
+// var showRulesContainer = document.querySelector('.showRuleContainer');
+var openRule = document.getElementById("openRule");
+var closeRule = document.getElementById("closeRule");
+var ruleContainer = document.getElementById("ruleContainer");
 
-ruleBtn.addEventListener('click', function() {
-  console.log('showRulesContainer', showRulesContainer);
-  
-  showRulesContainer.style.display = 'flex'
-})
+openRule.addEventListener("click", function () {
+  ruleContainer.style.display = "flex";
+});
+
+closeRule.addEventListener("click", function () {
+  ruleContainer.style.display = "none";
+});
+

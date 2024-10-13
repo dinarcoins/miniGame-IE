@@ -1,11 +1,103 @@
-.showRuleContainer {
+#ruleContainer {
   width: 80%;
-  height: 80%;
+  height: 50%;
   padding: 20px 30px;
   position: fixed;
+  border-radius: 20px;
+  display: none;
+  margin: 0 auto;
+  justify-content: center;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  border-radius: 20px;
-  display: none;
 }
+
+#closeRule {
+  top: 5%;
+  left: 2%;
+  position: absolute;
+  box-shadow: 10px 10px 49px 0px rgba(0, 0, 0, 0.75);
+}
+
+.ruleContent h2 {
+  text-align: center;
+  font-size: var(--title-font-size);
+  margin-bottom: 20px;
+}
+
+.ruleContent ul {
+  text-align: left;
+}
+
+.ruleContent ul li {
+  font-size: var(--text-font-size);
+}
+
+#notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Khoảng cách giữa các thông báo */
+  z-index: 1000;
+}
+
+/* Styles cho thông báo */
+.notification {
+  width: 250px;
+  padding: 15px;
+  border-radius: 5px;
+  font-size: 14px;
+  color: white;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  transform: translateX(300px);
+  opacity: 0;
+}
+
+.notification.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.notification.error {
+  background-color: #f44336;
+}
+
+.notification.warning {
+  background-color: #ff9800;
+}
+
+.notification.success {
+  background-color: #4caf50;
+}
+
+#information {
+  width: 20%;
+  display: flex;
+  border-radius: 10px;
+  margin-left: 20px;
+  justify-content: center;
+  flex-direction: column;
+}
+
+#virtual-keyboard {
+  margin-top: 20px;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+}
+
+.key:hover {
+  background-color: gray;
+  color: white;
+}
+
+#comeback {
+  width: fit-content;
+}
+
+#game-container {
+  flex-direction: column;
+}
+
