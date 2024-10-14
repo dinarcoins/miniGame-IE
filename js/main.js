@@ -12,25 +12,37 @@ var backToMenuBtn = document.getElementById("backToMenu");
 var currentCell = null;
 var displayTitle = document.getElementById("displayTitle");
 var continueGame = document.getElementById("continueGame");
-const highcore = document.getElementById("high-score");
+var highcore = document.getElementById("high-score");
+var pauseResumeBtn = document.getElementById("pauseResumeBtn");
+var isPaused = false;
+let elapsedTime = 0;
 
 function clickSound() {
   const sound = document.getElementById("click-sound");
-  sound.currentTime = 0; 
+  sound.currentTime = 0;
   sound.play();
+}
+
+function disableKeyboardInput() {
+  const inputs = document.querySelectorAll("#sudoku-board input");
+  inputs.forEach((input) => {
+    input.addEventListener("keydown", (event) => {
+      event.preventDefault();
+    });
+  });
 }
 
 function showNotification(status, message) {
   const container = document.getElementById("notification-container");
 
   const notification = document.createElement("div");
-  const sound = document.createElement('audio')
-  sound.src = './audio/pop.mp3'
+  const sound = document.createElement("audio");
+  sound.src = "./audio/pop.mp3";
   notification.classList.add("notification", status);
   notification.textContent = message;
 
   container.appendChild(notification);
-  sound.play()
+  sound.play();
   setTimeout(() => {
     notification.classList.add("show");
   }, 100);
@@ -44,14 +56,14 @@ function showNotification(status, message) {
 }
 
 backToMenuBtn.addEventListener("click", () => {
-  clickSound()
+  clickSound();
   gameArea.style.display = "none";
   menu.style.display = "block";
   clearInterval(timer);
 });
 
 function setDifficulty(level) {
-  clickSound()
+  clickSound();
   currentDifficulty = level;
   const buttons = document.querySelectorAll("#difficulty .button");
   buttons.forEach((button) => {
@@ -75,7 +87,7 @@ function continueGameBtn() {
 }
 
 function startGame() {
-  clickSound()
+  clickSound();
   playerName = playerNameInput.value.trim();
   if (!playerName) {
     showNotification("error", "Please fill your name!");
@@ -88,6 +100,7 @@ function startGame() {
   startTime = Date.now();
   timer = setInterval(updateTimer, 1000);
   generateBoard(currentDifficulty);
+  disableKeyboardInput();
 }
 
 function generateBoard(difficulty) {
@@ -99,25 +112,12 @@ function generateBoard(difficulty) {
     for (let col = 0; col < 9; col++) {
       const td = document.createElement("td");
       const input = document.createElement("input");
-      input.type = "number";
+      input.type = "text";
+      input.readOnly = true;
       input.min = 1;
       input.max = 9;
       input.value = presetBoard[row][col] ? presetBoard[row][col] : "";
       input.disabled = presetBoard[row][col] !== 0;
-      input.addEventListener("input", () => {
-        checkInput(row, col, input.value);
-        if (checkWinner()) {
-          highcore.textContent = `High Score : ${Math.floor(
-            (Date.now() - startTime) / 1000
-          )}`;
-          showNotification("success", "Winner! Winner...");
-          showWinnerContainer()
-          localStorage.setItem(
-            "highScore",
-            Math.floor((Date.now() - startTime) / 1000)
-          );
-        }
-      });
       input.addEventListener("input", () => checkInput(row, col, input.value));
       input.addEventListener("focus", () => highlightCell(input));
       input.addEventListener("blur", () => removeHighlight(input));
@@ -153,8 +153,11 @@ function generateSudokuBoard(difficulty) {
     case "hard":
       cellsToRemove = 50;
       break;
+    case "hardest":
+      cellsToRemove = 65;
+      break;
     default:
-      cellsToRemove = 1;
+      cellsToRemove = 30;
       break;
   }
 
@@ -218,6 +221,54 @@ function saveBoardToLocalStorage() {
   }
   localStorage.setItem("currentMap", JSON.stringify(boardState));
   showNotification("success", "Game saved!");
+}
+
+function pauseGame() {
+  clearInterval(timer);
+
+  const inputs = document.querySelectorAll("#sudoku-board input");
+  inputs.forEach((input) => {
+    input.disabled = true;
+  });
+
+  showNotification("warning", "Game paused!");
+}
+
+pauseResumeBtn.addEventListener("click", () => {
+  if (isPaused) {
+    resumeGame();
+    pauseResumeBtn.textContent = "Pause!";
+  } else {
+    pauseGame();
+    pauseResumeBtn.textContent = "Resume!";
+  }
+  isPaused = !isPaused;
+});
+
+function pauseGame() {
+  clearInterval(timer);
+  const inputs = document.querySelectorAll("#sudoku-board input");
+  inputs.forEach((input) => {
+    input.disabled = true;
+  });
+
+  elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+
+  showNotification("warning", "Game paused!");
+}
+
+function resumeGame() {
+  startTime = Date.now() - elapsedTime * 1000;
+  timer = setInterval(updateTimer, 1000);
+
+  const inputs = document.querySelectorAll("#sudoku-board input");
+  inputs.forEach((input) => {
+    if (!input.classList.contains("preset")) {
+      input.disabled = false;
+    }
+  });
+
+  showNotification("warning", "Game resumed!");
 }
 
 function shuffle(array) {
@@ -292,6 +343,18 @@ function enterValue(value) {
     const row = currentCell.parentElement.parentElement.rowIndex;
     const col = currentCell.parentElement.cellIndex;
     checkInput(row, col, value);
+
+    if (checkWinner()) {
+      highcore.textContent = `High Score : ${Math.floor(
+        (Date.now() - startTime) / 1000
+      )}`;
+      showNotification("success", "Winner! Winner...");
+      showWinnerContainer();
+      localStorage.setItem(
+        "highScore",
+        Math.floor((Date.now() - startTime) / 1000)
+      );
+    }
   }
 }
 

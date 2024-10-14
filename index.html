@@ -51,11 +51,11 @@
           <button class="button" onclick="setDifficulty('hard')">
             <p>Hard</p>
           </button>
+          <button class="button" onclick="setDifficulty('hardest')">
+            <p>Hardest!</p>
+          </button>
         </div>
         <button class="button" onclick="startGame()"><p>New Game</p></button>
-        <!-- <button class="button" id="continueGame" onclick="continueGameBtn()">
-          <p>Continue game</p>
-        </button> -->
         <button class="button" id="openRule"><p>Rules</p></button>
       </main>
 
@@ -64,8 +64,8 @@
         <button class="button" onclick="changeMap()">
           <p>Change Map!</p>
         </button>
-        <button class="button" onclick="saveBoardToLocalStorage()">
-          <p>Save Game!</p>
+        <button class="button" >
+            <p id="pauseResumeBtn">Pause!</p>
         </button>
         <table id="sudoku-board"></table>
         <div id="virtual-keyboard" class="flex flex-wrap">
