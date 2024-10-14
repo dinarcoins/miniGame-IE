@@ -1,27 +1,36 @@
-const startGameBtn = document.getElementById("startGameBtn");
-const board = document.getElementById("sudoku-board");
-const gameContainer = document.getElementById("game-container");
-const menuContainer = document.getElementById("menu-container");
-let timer;
-let startTime;
-let currentDifficulty = "easy";
-let highScore = localStorage.getItem("highScore") || 123;
-const playerNameInput = document.getElementById("player-name");
+var board = document.getElementById("sudoku-board");
+var gameContainer = document.getElementById("game-container");
+var menuContainer = document.getElementById("menu-container");
+var timer;
+var startTime;
+var currentDifficulty = "easy";
+var playerNameInput = document.getElementById("player-name");
 var playerName = "";
-const gameArea = document.getElementById("game-area");
-const menu = document.getElementById("menu");
-const backToMenuBtn = document.getElementById("backToMenu");
-let currentCell = null;
+var gameArea = document.getElementById("game-area");
+var menu = document.getElementById("menu");
+var backToMenuBtn = document.getElementById("backToMenu");
+var currentCell = null;
+var displayTitle = document.getElementById("displayTitle");
+var continueGame = document.getElementById("continueGame");
+const highcore = document.getElementById("high-score");
+
+function clickSound() {
+  const sound = document.getElementById("click-sound");
+  sound.currentTime = 0; 
+  sound.play();
+}
 
 function showNotification(status, message) {
-  var container = document.getElementById("notification-container");
+  const container = document.getElementById("notification-container");
 
-  var notification = document.createElement("div");
+  const notification = document.createElement("div");
+  const sound = document.createElement('audio')
+  sound.src = './audio/pop.mp3'
   notification.classList.add("notification", status);
   notification.textContent = message;
 
   container.appendChild(notification);
-
+  sound.play()
   setTimeout(() => {
     notification.classList.add("show");
   }, 100);
@@ -34,16 +43,15 @@ function showNotification(status, message) {
   }, 3000);
 }
 
-startGameBtn.addEventListener("click", function () {
-  startGame();
-});
-
 backToMenuBtn.addEventListener("click", () => {
+  clickSound()
   gameArea.style.display = "none";
   menu.style.display = "block";
+  clearInterval(timer);
 });
 
 function setDifficulty(level) {
+  clickSound()
   currentDifficulty = level;
   const buttons = document.querySelectorAll("#difficulty .button");
   buttons.forEach((button) => {
@@ -56,12 +64,24 @@ function setDifficulty(level) {
   });
 }
 
+function continueGameBtn() {
+  const haveContinue = localStorage.getItem("currentMap");
+  if (!haveContinue === null) {
+    menu.style.display = "none";
+    gameArea.style.display = "block";
+  } else {
+    showNotification("error", "Your don't have game");
+  }
+}
+
 function startGame() {
+  clickSound()
   playerName = playerNameInput.value.trim();
   if (!playerName) {
     showNotification("error", "Please fill your name!");
     return;
   }
+  displayTitle.textContent = playerName;
   menu.style.display = "none";
   gameArea.style.display = "block";
   clearInterval(timer);
@@ -84,6 +104,20 @@ function generateBoard(difficulty) {
       input.max = 9;
       input.value = presetBoard[row][col] ? presetBoard[row][col] : "";
       input.disabled = presetBoard[row][col] !== 0;
+      input.addEventListener("input", () => {
+        checkInput(row, col, input.value);
+        if (checkWinner()) {
+          highcore.textContent = `High Score : ${Math.floor(
+            (Date.now() - startTime) / 1000
+          )}`;
+          showNotification("success", "Winner! Winner...");
+          showWinnerContainer()
+          localStorage.setItem(
+            "highScore",
+            Math.floor((Date.now() - startTime) / 1000)
+          );
+        }
+      });
       input.addEventListener("input", () => checkInput(row, col, input.value));
       input.addEventListener("focus", () => highlightCell(input));
       input.addEventListener("blur", () => removeHighlight(input));
@@ -106,7 +140,6 @@ function generateBoard(difficulty) {
 
 function generateSudokuBoard(difficulty) {
   const board = Array.from({ length: 9 }, () => Array(9).fill(0));
-  const currentMap = localStorage.getItem("currentMap");
   if (!fillBoard(board)) {
     showNotification("error", "Cannot generate the board! Try agani.");
     return null;
@@ -121,7 +154,7 @@ function generateSudokuBoard(difficulty) {
       cellsToRemove = 50;
       break;
     default:
-      cellsToRemove = 30;
+      cellsToRemove = 1;
       break;
   }
 
@@ -170,6 +203,23 @@ function fillBoard(board) {
   return solve(board);
 }
 
+function saveBoardToLocalStorage() {
+  var inputs = document.querySelectorAll("#sudoku-board input");
+  var boardState = [];
+
+  for (var i = 0; i < 9; i++) {
+    var row = [];
+    for (var j = 0; j < 9; j++) {
+      var index = i * 9 + j;
+      var value = inputs[index].value;
+      row.push(value ? parseInt(value) : 0);
+    }
+    boardState.push(row);
+  }
+  localStorage.setItem("currentMap", JSON.stringify(boardState));
+  showNotification("success", "Game saved!");
+}
+
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -177,6 +227,7 @@ function shuffle(array) {
   }
   return array;
 }
+
 function removeCells(board, cellsToRemove) {
   let removed = 0;
   while (removed < cellsToRemove) {
@@ -267,8 +318,8 @@ function updateTimer() {
   document.getElementById("timer").innerText = `Time: ${elapsedTime}s`;
 }
 
-function resetGame() {
-  showNotification("success", "Game is reset!");
+function changeMap() {
+  showNotification("success", "Map changed!");
   clearInterval(timer);
   startGame();
 }
@@ -276,46 +327,50 @@ function resetGame() {
 function checkWinner() {
   const inputs = document.querySelectorAll("#sudoku-board input");
 
-  // Check if all cells are filled
-  for (let input of inputs) {
-    if (input.value === "") {
-      return false; // The game is not complete
-    }
-  }
+  for (let i = 0; i < 9; i++) {
+    for (let j = 0; j < 9; j++) {
+      const cell = inputs[i * 9 + j];
+      const value = parseInt(cell.value);
 
-  // Check for duplicate numbers in rows, columns, and 3x3 grids
-  for (let row = 0; row < 9; row++) {
-    for (let col = 0; col < 9; col++) {
-      const value = inputs[row * 9 + col].value;
-
-      // Check row
-      for (let i = 0; i < 9; i++) {
-        if (i !== col && inputs[row * 9 + i].value === value) {
-          return false;
-        }
-      }
-
-      // Check column
-      for (let i = 0; i < 9; i++) {
-        if (i !== row && inputs[i * 9 + col].value === value) {
-          return false;
-        }
-      }
-
-      // Check 3x3 grid
-      const startRow = Math.floor(row / 3) * 3;
-      const startCol = Math.floor(col / 3) * 3;
-      for (let i = startRow; i < startRow + 3; i++) {
-        for (let j = startCol; j < startCol + 3; j++) {
-          if ((i !== row || j !== col) && inputs[i * 9 + j].value === value) {
-            return false;
-          }
-        }
+      if (!value || !isValid(i, j, value)) {
+        return false;
       }
     }
   }
 
-  // If all checks passed, the player wins
-  showNotification("success", "Congratulations! You won the game!");
+  clearInterval(timer);
+
+  inputs.forEach((input) => {
+    input.disabled = true;
+  });
+
+  return true;
+}
+
+function isValid(row, col, value) {
+  const inputs = document.querySelectorAll("#sudoku-board input");
+
+  for (let i = 0; i < 9; i++) {
+    if (i !== col && parseInt(inputs[row * 9 + i].value) === value) {
+      return false;
+    }
+    if (i !== row && parseInt(inputs[i * 9 + col].value) === value) {
+      return false;
+    }
+  }
+
+  const startRow = Math.floor(row / 3) * 3;
+  const startCol = Math.floor(col / 3) * 3;
+  for (let i = startRow; i < startRow + 3; i++) {
+    for (let j = startCol; j < startCol + 3; j++) {
+      if (
+        (i !== row || j !== col) &&
+        parseInt(inputs[i * 9 + j].value) === value
+      ) {
+        return false;
+      }
+    }
+  }
+
   return true;
 }

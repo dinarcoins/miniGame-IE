@@ -1,5 +1,6 @@
 @import "./elementStyle.css";
 @import url("https://fonts.cdnfonts.com/css/thegoodmonolith");
+@import "../css/responsive.css";
 
 * {
   padding: 0;
@@ -10,22 +11,28 @@
   outline: none;
 }
 
-body {
-  text-align: center;
-  background-color: #f0f0f0;
-}
-
 h1 {
   color: #333;
 }
 
+label {
+  font-size: var(--text-font-medium);
+}
 
 :root {
   --mainColor: #212121;
   --redPrimary: #dc3545;
   --whiteColor: #e8e8e8;
   --text-font-size: 1rem;
+  --text-font-sm: 0.875rem;
+  --text-font-base: 1.25rem;
+  --text-font-medium: 1.5rem;
   --title-font-size: 2rem;
+  --orange-color: #ffa12b;
+  --orange-color-active: #f78900;
+  --black-color: var(--black-color) 000;
+  --gray-white-color: #c9c9c9;
+  --gray-color: #949494;
 }
 
 input::-webkit-outer-spin-button,
@@ -40,7 +47,11 @@ input[type="number"] {
 
 table tr td input.preset {
   font-weight: bold;
-  background-color: #c9c9c9;
+  background-color: var(--gray-white-color);
+}
+
+table tr td input:focus {
+  background-color: yellow;
 }
 
 input:not([disabled]) {
@@ -71,6 +82,36 @@ input:not([disabled]) {
   background-repeat: no-repeat;
   background-size: cover;
   overflow: hidden;
+  position: relative;
+}
+
+.wraper::before {
+  content: "";
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: var(--black-color);
+  opacity: 0.2;
+  z-index: -1;
+}
+
+.wraper:after {
+  content: "";
+  width: 50%;
+  height: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--black-color);
+  opacity: 0.6;
+  z-index: -1;
+  background-image: url("../img/giphy.webp");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .button {
@@ -83,13 +124,13 @@ input:not([disabled]) {
 }
 
 .button.active p {
-  background-color: #949494;
-  color: white;
+  background-color: var(--gray-color);
+  color: var(--whiteColor);
   top: 5px;
 }
 
 .button:disabled p {
-  background-color: #949494;
+  background-color: var(--gray-color);
 }
 
 .button:after {
@@ -110,7 +151,7 @@ input:not([disabled]) {
 .button p {
   color: white;
   font-weight: bold;
-  font-size: var(--text-font);
+  font-size: var(--text-font-base);
   text-align: center;
   text-decoration: none;
   background-color: #ffa12b;
@@ -118,14 +159,18 @@ input:not([disabled]) {
   position: relative;
   padding: 10px 20px;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  text-shadow: 0px 1px 0px #000;
-  filter: dropshadow(color=#000, offx=0px, offy=1px);
+  text-shadow: 0px 1px 0px var(--black-color);
+  filter: dropshadow(color=var(--black-color), offx=0px, offy=1px);
   -webkit-box-shadow: inset 0 1px 0 #ffe5c4, 0 10px 0 #915100;
   -moz-box-shadow: inset 0 1px 0 #ffe5c4, 0 10px 0 #915100;
   box-shadow: inset 0 1px 0 #ffe5c4, 0 10px 0 #915100;
   -webkit-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
+}
+
+.smallBtn p {
+  padding: 0 10px;
 }
 
 .button p:active {
@@ -153,33 +198,29 @@ input:not([disabled]) {
 
 .footer {
   position: absolute;
-  bottom: 0;
+  bottom: 2%;
   right: 50%;
   transform: translateX(50%);
 }
 
 .footer p {
   color: var(--whiteColor);
-  font-size: 1rem;
-  font-weight: 500;
-  text-transform: uppercase;
 }
 
 .shape {
   background-color: #ffa12b;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  text-shadow: 0px 1px 0px #000;
-  filter: dropshadow(color=#000, offx=0px, offy=1px);
+  text-shadow: 0px 1px 0px var(--black-color);
+  filter: dropshadow(color=var(--black-color), offx=0px, offy=1px);
   -webkit-box-shadow: inset 0 1px 0 #ffe5c4, 0 10px 0 #915100;
   -moz-box-shadow: inset 0 1px 0 #ffe5c4, 0 10px 0 #915100;
   box-shadow: inset 0 1px 0 #ffe5c4, 0 10px 0 #915100;
 }
 
-
 #sudoku-board {
   border-collapse: collapse;
   margin: 20px auto;
-  background-color: #fff;
+  background-color: var(--whiteColor);
   border: 2px solid #333;
 }
 
@@ -187,7 +228,7 @@ input:not([disabled]) {
   width: 40px;
   height: 40px;
   text-align: center;
-  border: 1px solid #000;
+  border: 1px solid var(--black-color);
 }
 
 #sudoku-board input {
@@ -200,7 +241,7 @@ input:not([disabled]) {
 }
 
 #sudoku-board input:disabled {
-  color: #000;
+  color: var(--black-color);
   font-weight: bold;
 }
 
@@ -224,4 +265,32 @@ button {
 
 #gameContainer {
   display: none;
+}
+
+@media screen and (max-width: 600px) {
+  .button p {
+    font-size: var(--text-font-sm);
+    -webkit-box-shadow: inset 0 1px 0 #ffe5c4, 0 5px 0 #915100;
+  }
+  .button:after {
+    bottom: -10px;
+  }
+
+  .notification {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  #information {
+    width: fit-content;
+    top: 80%;
+    padding: 0 20px;
+  }
+  .ad-right {
+    display: none;
+  }
 }
