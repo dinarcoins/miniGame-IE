@@ -1,27 +1,22 @@
-var board = document.getElementById("sudoku-board");
-var gameContainer = document.getElementById("game-container");
-var menuContainer = document.getElementById("menu-container");
 var timer;
 var startTime;
-var currentDifficulty = "easy";
-var playerNameInput = document.getElementById("player-name");
+let elapsedTime = 0;
 var playerName = "";
-var gameArea = document.getElementById("game-area");
-var menu = document.getElementById("menu");
-var backToMenuBtn = document.getElementById("backToMenu");
+var isPaused = false;
 var currentCell = null;
+var currentDifficulty = "easy";
+var menu = document.getElementById("menu");
+var gameArea = document.getElementById("game-area");
+var board = document.getElementById("sudoku-board");
+var highcore = document.getElementById("high-score");
+var backToMenuBtn = document.getElementById("backToMenu");
 var displayTitle = document.getElementById("displayTitle");
 var continueGame = document.getElementById("continueGame");
-var highcore = document.getElementById("high-score");
+var playerNameInput = document.getElementById("player-name");
+var gameContainer = document.getElementById("game-container");
+var menuContainer = document.getElementById("menu-container");
 var pauseResumeBtn = document.getElementById("pauseResumeBtn");
-var isPaused = false;
-let elapsedTime = 0;
-
-function clickSound() {
-  const sound = document.getElementById("click-sound");
-  sound.currentTime = 0;
-  sound.play();
-}
+var winnerContainer = document.querySelector(".winner-container");
 
 function disableKeyboardInput() {
   const inputs = document.querySelectorAll("#sudoku-board input");
@@ -30,6 +25,13 @@ function disableKeyboardInput() {
       event.preventDefault();
     });
   });
+}
+
+function openWinner() {
+  winnerContainer.style.display = "block";
+  const sound = document.createElement("audio");
+  sound.src = "./audio/winner.mp3";
+  sound.play();
 }
 
 function showNotification(status, message) {
@@ -56,14 +58,12 @@ function showNotification(status, message) {
 }
 
 backToMenuBtn.addEventListener("click", () => {
-  clickSound();
   gameArea.style.display = "none";
   menu.style.display = "block";
   clearInterval(timer);
 });
 
 function setDifficulty(level) {
-  clickSound();
   currentDifficulty = level;
   const buttons = document.querySelectorAll("#difficulty .button");
   buttons.forEach((button) => {
@@ -76,18 +76,7 @@ function setDifficulty(level) {
   });
 }
 
-function continueGameBtn() {
-  const haveContinue = localStorage.getItem("currentMap");
-  if (!haveContinue === null) {
-    menu.style.display = "none";
-    gameArea.style.display = "block";
-  } else {
-    showNotification("error", "Your don't have game");
-  }
-}
-
 function startGame() {
-  clickSound();
   playerName = playerNameInput.value.trim();
   if (!playerName) {
     showNotification("error", "Please fill your name!");
@@ -349,7 +338,7 @@ function enterValue(value) {
         (Date.now() - startTime) / 1000
       )}`;
       showNotification("success", "Winner! Winner...");
-      showWinnerContainer();
+      openWinner();
       localStorage.setItem(
         "highScore",
         Math.floor((Date.now() - startTime) / 1000)
