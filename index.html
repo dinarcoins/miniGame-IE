@@ -22,17 +22,17 @@
     <audio id="click-sound" src="./audio/keyBoard.mp3"></audio>
     <div class="characterPixel">
       <img src="./img/character.png" alt="character" />
+      <div class="characterPixel-item shape">
+        <p id="high-score">High Score: N/A</p>
+        <p id="timer">Time: 0s</p>
+      </div>
     </div>
-    <div id="information" class="shape text-xs lg:text-xl">
-      <p id="high-score">High Score: N/A</p>
-      <p id="timer">Time: 0s</p>
-    </div>
-    <aside id="tricks">
+    <aside id="tricks" class="shape">
       <h3 class="text-2xl">Tricks for you <i class="far fa-smile-wink"></i></h3>
 
       <div></div>
     </aside>
-    <header class="my-5">
+    <header class="my-1 md:my-5">
       <h1
         id="displayTitle"
         class="text-4xl md:text-5xl text-center whitespace-nowrap font-bold text-white"
@@ -110,7 +110,7 @@
         <h2 class="text-lg lg:text-2xl text-center font-extrabold lg:mb-10">
           Rules of the Game Sudoku
         </h2>
-        <ul class="text-left lg:px-10 text-justify text-xs lg:text-base">
+        <ul class="text-left lg:px-10 text-justify text-sm lg:text-xl">
           <li>
             Sudoku is a logic-based number-arranging puzzle game. The rules are
             quite simple, so even beginners can solve simple levels.
