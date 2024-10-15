@@ -155,22 +155,22 @@ function generateSudokuBoard(difficulty) {
   return board;
 }
 
-function fillBoard(board) {
-  function canPlaceNumber(board, row, col, num) {
-    for (let i = 0; i < 9; i++) {
-      if (board[row][i] === num || board[i][col] === num) {
-        return false;
-      }
-
-      const boxRow = 3 * Math.floor(row / 3) + Math.floor(i / 3);
-      const boxCol = 3 * Math.floor(col / 3) + (i % 3);
-      if (board[boxRow][boxCol] === num) {
-        return false;
-      }
+function canPlaceNumber(board, row, col, num) {
+  for (let i = 0; i < 9; i++) {
+    if (board[row][i] === num || board[i][col] === num) {
+      return false;
     }
-    return true;
-  }
 
+    const boxRow = 3 * Math.floor(row / 3) + Math.floor(i / 3);
+    const boxCol = 3 * Math.floor(col / 3) + (i % 3);
+    if (board[boxRow][boxCol] === num) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function fillBoard(board) {
   function solve(board) {
     for (let row = 0; row < 9; row++) {
       for (let col = 0; col < 9; col++) {
@@ -193,6 +193,26 @@ function fillBoard(board) {
   }
 
   return solve(board);
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function removeCells(board, cellsToRemove) {
+  let removed = 0;
+  while (removed < cellsToRemove) {
+    const row = Math.floor(Math.random() * 9);
+    const col = Math.floor(Math.random() * 9);
+    if (board[row][col] !== 0) {
+      board[row][col] = 0;
+      removed++;
+    }
+  }
 }
 
 function saveBoardToLocalStorage() {
@@ -258,26 +278,6 @@ function resumeGame() {
   });
 
   showNotification("warning", "Game resumed!");
-}
-
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-  return array;
-}
-
-function removeCells(board, cellsToRemove) {
-  let removed = 0;
-  while (removed < cellsToRemove) {
-    const row = Math.floor(Math.random() * 9);
-    const col = Math.floor(Math.random() * 9);
-    if (board[row][col] !== 0) {
-      board[row][col] = 0;
-      removed++;
-    }
-  }
 }
 
 function checkInput(row, col, value) {
