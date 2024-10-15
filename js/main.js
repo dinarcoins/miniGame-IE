@@ -137,10 +137,10 @@ function generateSudokuBoard(difficulty) {
   let cellsToRemove;
   switch (difficulty) {
     case "medium":
-      cellsToRemove = 40;
+      cellsToRemove = 35;
       break;
     case "hard":
-      cellsToRemove = 50;
+      cellsToRemove = 45;
       break;
     case "hardest":
       cellsToRemove = 65;
