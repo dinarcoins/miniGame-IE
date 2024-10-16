@@ -1,5 +1,5 @@
 let elapsedTime = 0;
-let timerInterval; 
+let timerInterval;
 var playerName = "";
 var isPausedGame = false;
 var initialBoard = [];
@@ -18,6 +18,7 @@ var gameContainer = document.getElementById("game-container");
 var menuContainer = document.getElementById("menu-container");
 var pauseResumeBtn = document.getElementById("pauseResumeBtn");
 var winnerContainer = document.querySelector(".winner-container");
+const score = localStorage.getItem("highScore") || null;
 
 function startTimer() {
   elapsedTime = 0;
@@ -204,13 +205,6 @@ function resumeGame() {
   showNotification("warning", "Game resumed!");
 }
 
-function saveScore() {
-  const score = localStorage.getItem('highScore') || null
-  if(score === null) {
-    console.log('elapsedTime', elapsedTime);
-  }
-}
-
 // generated Board 9x9 logic code
 // bắt đầu chơi game
 function startGame() {
@@ -222,6 +216,7 @@ function startGame() {
   displayTitle.textContent = playerName;
   menu.style.display = "none";
   gameArea.style.display = "block";
+  displayHighScore();
   startTimer();
   generateBoard(currentDifficulty);
   disableKeyboardInput();
@@ -411,21 +406,16 @@ function enterValue(value) {
     const row = currentCell.parentElement.parentElement.rowIndex;
     const col = currentCell.parentElement.cellIndex;
     checkInput(row, col, value);
-
-    if (checkWinner()) {
-      // highcore.textContent = `High Score : ${Math.floor(
-      //   (Date.now() - startTime) / 1000
-      // )}`;
-      showNotification("success", "Winner! Winner...");
-      openWinner();
-      // localStorage.setItem(
-      //   "highScore",
-      //   Math.floor((Date.now() - startTime) / 1000)
-      // );
-    }
+  }
+  if (checkWinner()) {
+    checkHighScore();
+    displayHighScore();
+    showNotification("success", "Winner! Winner...");
+    openWinner();
+    isPausedGame = true;
   }
 }
-// xoá bỏ value trong ô input đó
+// clearCell xoá bỏ value trong ô input đó
 function clearCell() {
   if (currentCell && !currentCell.disabled) {
     currentCell.value = "";
@@ -458,8 +448,6 @@ function checkWinner() {
       }
     }
   }
-
-  // clearInterval(timer);
 
   inputs.forEach((input) => {
     input.disabled = true;
@@ -494,4 +482,20 @@ function isValidCheckWinner(row, col, value) {
   }
 
   return true;
+}
+// checkHighScore dùng để check điểm hiện tại trong local, nếu chưa có điểm cao hoặc điểm hiện tại tốt hơn điểm cao nhất đã lưu, cập nhật điểm cao nhất
+function checkHighScore() {
+  const currentHighScore = localStorage.getItem("highScore");
+  if (!currentHighScore || elapsedTime < parseInt(currentHighScore)) {
+    localStorage.setItem("highScore", elapsedTime);
+  }
+}
+// displayHighScore dùng để render ra điểm cao nhất cho highcore
+function displayHighScore() {
+  const highScore = localStorage.getItem("highScore");
+  if (highScore) {
+    highcore.textContent = `High Score: ${highScore}s`;
+  } else {
+    highcore.textContent = "High Score: 0s";
+  }
 }
