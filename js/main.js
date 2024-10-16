@@ -1,8 +1,7 @@
-var startTime;
-var timerInterval;
-var pausedTime = 0;
+let elapsedTime = 0;
+let timerInterval; 
 var playerName = "";
-var isPaused = false;
+var isPausedGame = false;
 var initialBoard = [];
 var currentCell = null;
 var currentDifficulty = "easy";
@@ -20,26 +19,33 @@ var menuContainer = document.getElementById("menu-container");
 var pauseResumeBtn = document.getElementById("pauseResumeBtn");
 var winnerContainer = document.querySelector(".winner-container");
 
-function startTimer(restart) {
-  if ((restart = true)) {
-    pausedTime = 0;
-  }
-  startTime = Date.now() - pausedTime;
+function startTimer() {
+  elapsedTime = 0;
+  isPausedGame = false;
+  updateTimer();
   timerInterval = setInterval(() => {
-    const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-    document.getElementById("timer").innerText = `Time: ${elapsedTime}s`;
+    if (!isPausedGame) {
+      elapsedTime++;
+      updateTimer();
+    }
   }, 1000);
-}
-
-function pauseTimer() {
-  clearInterval(timerInterval);
-  pausedTime = Date.now() - startTime;
 }
 
 function resetTimer() {
   clearInterval(timerInterval);
-  pausedTime = 0;
-  document.getElementById("timer").innerText = `Time: 0s`;
+  elapsedTime = 0;
+  updateTimer();
+}
+
+function updateTimer() {
+  document.getElementById("timer").innerText = `Time: ${elapsedTime}s`;
+}
+
+function restartTimer() {
+  elapsedTime = 0;
+  clearInterval(timerInterval);
+  updateTimer();
+  startTimer();
 }
 
 function disableKeyboardInput() {
@@ -144,14 +150,12 @@ backToMenuBtn.addEventListener("click", () => {
 restartBtn.addEventListener("click", () => {
   confirmModal(() => {
     restart();
-    startTimer(true);
   });
 });
 
 function restart() {
   const inputs = document.querySelectorAll("#sudoku-board input");
-  resumeGame();
-  resetTimer();
+  restartTimer();
   // Khôi phục lại trạng thái gốc của bảng Sudoku
   for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
@@ -172,24 +176,22 @@ function restart() {
 }
 
 function pauseGame() {
-  pauseTimer();
   const inputs = document.querySelectorAll("#sudoku-board input");
   inputs.forEach((input) => {
     input.disabled = true;
   });
-
   showNotification("warning", "Game paused!");
 }
 
 pauseResumeBtn.addEventListener("click", () => {
-  if (isPaused) {
+  if (isPausedGame) {
     resumeGame();
     pauseResumeBtn.textContent = "Pause!";
   } else {
     pauseGame();
     pauseResumeBtn.textContent = "Resume!";
   }
-  isPaused = !isPaused;
+  isPausedGame = !isPausedGame;
 });
 
 function resumeGame() {
@@ -199,8 +201,14 @@ function resumeGame() {
       input.disabled = false;
     }
   });
-
   showNotification("warning", "Game resumed!");
+}
+
+function saveScore() {
+  const score = localStorage.getItem('highScore') || null
+  if(score === null) {
+    console.log('elapsedTime', elapsedTime);
+  }
 }
 
 // generated Board 9x9 logic code
@@ -214,7 +222,7 @@ function startGame() {
   displayTitle.textContent = playerName;
   menu.style.display = "none";
   gameArea.style.display = "block";
-  startTimer(false);
+  startTimer();
   generateBoard(currentDifficulty);
   disableKeyboardInput();
 }
@@ -222,7 +230,9 @@ function startGame() {
 function generateBoard(difficulty) {
   board.innerHTML = "";
   const presetBoard = generateSudokuBoard(difficulty);
+  // trả về ma trận đã được trộn, check logic
   initialBoard = presetBoard;
+  // lưu map hiện tại để có thể restart game
 
   for (let row = 0; row < 9; row++) {
     const tr = document.createElement("tr");
@@ -403,15 +413,15 @@ function enterValue(value) {
     checkInput(row, col, value);
 
     if (checkWinner()) {
-      highcore.textContent = `High Score : ${Math.floor(
-        (Date.now() - startTime) / 1000
-      )}`;
+      // highcore.textContent = `High Score : ${Math.floor(
+      //   (Date.now() - startTime) / 1000
+      // )}`;
       showNotification("success", "Winner! Winner...");
       openWinner();
-      localStorage.setItem(
-        "highScore",
-        Math.floor((Date.now() - startTime) / 1000)
-      );
+      // localStorage.setItem(
+      //   "highScore",
+      //   Math.floor((Date.now() - startTime) / 1000)
+      // );
     }
   }
 }
