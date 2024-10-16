@@ -10,6 +10,8 @@
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: var(--whiteColor);
+  height: 80%;
+  overflow: scroll;
 }
 
 #closeRule {
