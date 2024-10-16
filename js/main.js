@@ -1,9 +1,9 @@
-var timer;
 var startTime;
-let elapsedTime = 0;
+var timerInterval;
+var pausedTime = 0;
 var playerName = "";
 var isPaused = false;
-let initialBoard = [];
+var initialBoard = [];
 var currentCell = null;
 var currentDifficulty = "easy";
 var menu = document.getElementById("menu");
@@ -19,6 +19,28 @@ var gameContainer = document.getElementById("game-container");
 var menuContainer = document.getElementById("menu-container");
 var pauseResumeBtn = document.getElementById("pauseResumeBtn");
 var winnerContainer = document.querySelector(".winner-container");
+
+function startTimer(restart) {
+  if ((restart = true)) {
+    pausedTime = 0;
+  }
+  startTime = Date.now() - pausedTime;
+  timerInterval = setInterval(() => {
+    const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+    document.getElementById("timer").innerText = `Time: ${elapsedTime}s`;
+  }, 1000);
+}
+
+function pauseTimer() {
+  clearInterval(timerInterval);
+  pausedTime = Date.now() - startTime;
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  pausedTime = 0;
+  document.getElementById("timer").innerText = `Time: 0s`;
+}
 
 function disableKeyboardInput() {
   const inputs = document.querySelectorAll("#sudoku-board input");
@@ -72,22 +94,6 @@ function setDifficulty(level) {
   });
 }
 
-function startGame() {
-  playerName = playerNameInput.value.trim();
-  if (!playerName) {
-    showNotification("error", "Please fill your name!");
-    return;
-  }
-  displayTitle.textContent = playerName;
-  menu.style.display = "none";
-  gameArea.style.display = "block";
-  clearInterval(timer);
-  startTime = Date.now();
-  timer = setInterval(updateTimer, 1000);
-  generateBoard(currentDifficulty);
-  disableKeyboardInput();
-}
-
 function confirmModal(confirmCallback) {
   const modal = document.createElement("div");
   const titleText = document.createElement("h2");
@@ -131,19 +137,21 @@ backToMenuBtn.addEventListener("click", () => {
   confirmModal(() => {
     gameArea.style.display = "none";
     menu.style.display = "block";
-    clearInterval(timer);
+    resetTimer();
   });
 });
 
 restartBtn.addEventListener("click", () => {
   confirmModal(() => {
     restart();
+    startTimer(true);
   });
 });
 
 function restart() {
   const inputs = document.querySelectorAll("#sudoku-board input");
   resumeGame();
+  resetTimer();
   // Khôi phục lại trạng thái gốc của bảng Sudoku
   for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
@@ -163,6 +171,54 @@ function restart() {
   showNotification("success", "The game has been restarted!");
 }
 
+function pauseGame() {
+  pauseTimer();
+  const inputs = document.querySelectorAll("#sudoku-board input");
+  inputs.forEach((input) => {
+    input.disabled = true;
+  });
+
+  showNotification("warning", "Game paused!");
+}
+
+pauseResumeBtn.addEventListener("click", () => {
+  if (isPaused) {
+    resumeGame();
+    pauseResumeBtn.textContent = "Pause!";
+  } else {
+    pauseGame();
+    pauseResumeBtn.textContent = "Resume!";
+  }
+  isPaused = !isPaused;
+});
+
+function resumeGame() {
+  const inputs = document.querySelectorAll("#sudoku-board input");
+  inputs.forEach((input) => {
+    if (!input.classList.contains("preset")) {
+      input.disabled = false;
+    }
+  });
+
+  showNotification("warning", "Game resumed!");
+}
+
+// generated Board 9x9 logic code
+// bắt đầu chơi game
+function startGame() {
+  playerName = playerNameInput.value.trim();
+  if (!playerName) {
+    showNotification("error", "Please fill your name!");
+    return;
+  }
+  displayTitle.textContent = playerName;
+  menu.style.display = "none";
+  gameArea.style.display = "block";
+  startTimer(false);
+  generateBoard(currentDifficulty);
+  disableKeyboardInput();
+}
+// generateBoard dùng để fill value vào table input 9x9
 function generateBoard(difficulty) {
   board.innerHTML = "";
   const presetBoard = generateSudokuBoard(difficulty);
@@ -198,7 +254,7 @@ function generateBoard(difficulty) {
     board.appendChild(tr);
   }
 }
-
+// generateSudokuBoard dùng để tạo ma trận
 function generateSudokuBoard(difficulty) {
   const board = Array.from({ length: 9 }, () => Array(9).fill(0));
   // 9x9 tất cả value = 0
@@ -228,7 +284,7 @@ function generateSudokuBoard(difficulty) {
   // sử dụng để xoá đi số lượng ô theo như level
   return board;
 }
-
+// canPlaceNumber dùng để check số không cùng roư, col, 3x3
 function canPlaceNumber(board, row, col, num) {
   // dùng để check số không cùng roư, col, 3x3
   for (let i = 0; i < 9; i++) {
@@ -245,9 +301,8 @@ function canPlaceNumber(board, row, col, num) {
   }
   return true;
 }
-
+// solve dùng để map ra board, tạo ma trận, dùng conPlaceNumber để check vị trí đó có thể fill value vào được không
 function solve(board) {
-  console.log('solve', board);
   // sử dụng đệ quy và backTracking để check tính hợp lệ của board
   for (let row = 0; row < 9; row++) {
     for (let col = 0; col < 9; col++) {
@@ -268,9 +323,8 @@ function solve(board) {
   }
   return true;
 }
-
+// shuffle nhận vào array, trả về 1 array đã được swap random
 function shuffle(array) {
-  // nhận vào array, trả về 1 array đã được swap
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
@@ -278,9 +332,8 @@ function shuffle(array) {
   }
   return array;
 }
-
+// removeCells nhận vào board (ma trận đã trộn số), số lượng cần xoá, trả về board đã được xoá theo số lượng cần xoá một cách ngẫu nhiên
 function removeCells(board, cellsToRemove) {
-  // nhận vào board (ma trận đã trộn số), số lượng cần xoá, trả về board đã được xoá theo số lượng cần xoá một cách ngẫu nhiên
   let removed = 0;
   // biến removed để ghi nhận rằng một ô đã bị xóa.
   while (removed < cellsToRemove) {
@@ -292,55 +345,7 @@ function removeCells(board, cellsToRemove) {
     }
   }
 }
-
-function pauseGame() {
-  clearInterval(timer);
-
-  const inputs = document.querySelectorAll("#sudoku-board input");
-  inputs.forEach((input) => {
-    input.disabled = true;
-  });
-
-  showNotification("warning", "Game paused!");
-}
-
-pauseResumeBtn.addEventListener("click", () => {
-  if (isPaused) {
-    resumeGame();
-    pauseResumeBtn.textContent = "Pause!";
-  } else {
-    pauseGame();
-    pauseResumeBtn.textContent = "Resume!";
-  }
-  isPaused = !isPaused;
-});
-
-function pauseGame() {
-  clearInterval(timer);
-  const inputs = document.querySelectorAll("#sudoku-board input");
-  inputs.forEach((input) => {
-    input.disabled = true;
-  });
-
-  elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-
-  showNotification("warning", "Game paused!");
-}
-
-function resumeGame() {
-  startTime = Date.now() - elapsedTime * 1000;
-  timer = setInterval(updateTimer, 1000);
-
-  const inputs = document.querySelectorAll("#sudoku-board input");
-  inputs.forEach((input) => {
-    if (!input.classList.contains("preset")) {
-      input.disabled = false;
-    }
-  });
-
-  showNotification("warning", "Game resumed!");
-}
-
+// checking value tại input đó dựa vào row col value, hiện thị các style dupplicate, correct, error
 function checkInput(row, col, value) {
   const inputs = document.querySelectorAll("#sudoku-board input");
   let hasError = false;
@@ -389,7 +394,7 @@ function checkInput(row, col, value) {
     inputs[row * 9 + col].classList.remove("duplicate");
   }
 }
-
+// nhận giá trị value trả về giá trị đó
 function enterValue(value) {
   if (currentCell && !currentCell.disabled) {
     currentCell.value = value;
@@ -410,7 +415,7 @@ function enterValue(value) {
     }
   }
 }
-
+// xoá bỏ value trong ô input đó
 function clearCell() {
   if (currentCell && !currentCell.disabled) {
     currentCell.value = "";
@@ -429,36 +434,8 @@ function removeHighlight(input) {
   input.classList.remove("highlight");
 }
 
-function updateTimer() {
-  const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-  document.getElementById("timer").innerText = `Time: ${elapsedTime}s`;
-}
-
-function checkHighScore(newScore) {
-  // Lấy giá trị highScore từ localStorage
-  const highScore = localStorage.getItem("highScore");
-
-  // Nếu chưa có highScore, trả về null
-  if (highScore === null) {
-    localStorage.setItem("highScore", newScore);
-    return null;
-  }
-
-  // Chuyển đổi giá trị highScore từ localStorage sang số nguyên
-  const bestScore = parseInt(highScore);
-
-  // Nếu newScore nhỏ hơn bestScore, lưu newScore vào localStorage
-  if (newScore < bestScore) {
-    localStorage.setItem("highScore", newScore);
-    return newScore;
-  }
-
-  // Nếu không, giữ nguyên bestScore
-  return bestScore;
-}
-
 function checkWinner() {
-  // duyệt qua tất cả các ô xem có value, và tính hợp lệ trong logic 
+  // duyệt qua tất cả các ô xem có value, và tính hợp lệ trong logic
   const inputs = document.querySelectorAll("#sudoku-board input");
 
   for (let i = 0; i < 9; i++) {
@@ -472,7 +449,7 @@ function checkWinner() {
     }
   }
 
-  clearInterval(timer);
+  // clearInterval(timer);
 
   inputs.forEach((input) => {
     input.disabled = true;
