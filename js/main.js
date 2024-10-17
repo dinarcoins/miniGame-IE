@@ -10,6 +10,8 @@ var gameArea = document.getElementById("game-area");
 var board = document.getElementById("sudoku-board");
 var highcore = document.getElementById("high-score");
 var restartBtn = document.getElementById("restartBtn");
+const score = localStorage.getItem("highScore") || null;
+var changeMapBtn = document.getElementById("changeMap");
 var backToMenuBtn = document.getElementById("backToMenu");
 var displayTitle = document.getElementById("displayTitle");
 var continueGame = document.getElementById("continueGame");
@@ -18,7 +20,6 @@ var gameContainer = document.getElementById("game-container");
 var menuContainer = document.getElementById("menu-container");
 var pauseResumeBtn = document.getElementById("pauseResumeBtn");
 var winnerContainer = document.querySelector(".winner-container");
-const score = localStorage.getItem("highScore") || null;
 
 function startTimer() {
   elapsedTime = 0;
@@ -47,6 +48,12 @@ function restartTimer() {
   clearInterval(timerInterval);
   updateTimer();
   startTimer();
+}
+
+function stopTime() {
+  clearInterval(timerInterval);
+  elapsedTime = 0;
+  document.getElementById("timer").innerText = `Time: 0s`;
 }
 
 function disableKeyboardInput() {
@@ -144,13 +151,19 @@ backToMenuBtn.addEventListener("click", () => {
   confirmModal(() => {
     gameArea.style.display = "none";
     menu.style.display = "block";
-    resetTimer();
+    stopTime();
   });
 });
 
 restartBtn.addEventListener("click", () => {
   confirmModal(() => {
     restart();
+  });
+});
+
+changeMapBtn.addEventListener("click", () => {
+  confirmModal(() => {
+    changeMap();
   });
 });
 
@@ -180,6 +193,7 @@ function pauseGame() {
   const inputs = document.querySelectorAll("#sudoku-board input");
   inputs.forEach((input) => {
     input.disabled = true;
+    input.style.opacity = "0";
   });
   showNotification("warning", "Game paused!");
 }
@@ -198,6 +212,7 @@ pauseResumeBtn.addEventListener("click", () => {
 function resumeGame() {
   const inputs = document.querySelectorAll("#sudoku-board input");
   inputs.forEach((input) => {
+    input.style.opacity = "1";
     if (!input.classList.contains("preset")) {
       input.disabled = false;
     }
@@ -455,7 +470,8 @@ function checkWinner() {
 
   return true;
 }
-
+// isValidCheckWinner này kiểm tra xem một giá trị (value) có hợp lệ tại vị trí ô Sudoku cụ thể (theo dòng row và cột col) hay không
+// check xem số nhập tại ô input có row và col có trùng với số nào trong row, col, 3x3 hay không
 function isValidCheckWinner(row, col, value) {
   const inputs = document.querySelectorAll("#sudoku-board input");
 
@@ -498,4 +514,10 @@ function displayHighScore() {
   } else {
     highcore.textContent = "High Score: 0s";
   }
+}
+
+// ChangeMap cho phép player thay đổi map, tính lại thời gian.
+function changeMap() {
+  generateBoard(currentDifficulty);
+  showNotification("success", "Map changed!");
 }

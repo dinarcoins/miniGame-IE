@@ -80,10 +80,6 @@ var ruleLists = [
   {
     decs: "This Sudoku solving technique is built upon the previous one - 'Obvious pairs'. But 'Obvious triples' is not based on two numbers from the Notes, it's based on three. This is the only difference. To understand better, let's take a look at the example.",
   },
-  { decs: "" },
-  { decs: "" },
-  { decs: "" },
-  { decs: "" },
 ];
 
 ruleList.innerHTML = ruleLists
