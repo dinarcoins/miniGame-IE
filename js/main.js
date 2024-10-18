@@ -299,7 +299,6 @@ function generateSudokuBoard(difficulty) {
       cellsToRemove = 30;
       break;
   }
-
   removeCells(board, cellsToRemove);
   // sử dụng để xoá đi số lượng ô theo như level
   return board;
@@ -359,10 +358,8 @@ function removeCells(board, cellsToRemove) {
   while (removed < cellsToRemove) {
     const row = Math.floor(Math.random() * 9);
     const col = Math.floor(Math.random() * 9);
-    if (board[row][col] !== 0) {
-      board[row][col] = 0;
-      removed++;
-    }
+    board[row][col] = 0;
+    removed++;
   }
 }
 // checking value tại input đó dựa vào row col value, hiện thị các style dupplicate, correct, error
