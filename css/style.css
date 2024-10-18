@@ -1,6 +1,5 @@
 @import "./elementStyle.css";
 @import url("https://fonts.cdnfonts.com/css/thegoodmonolith");
-@import "../css/responsive.css";
 
 * {
   padding: 0;
